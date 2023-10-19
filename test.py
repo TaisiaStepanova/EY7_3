@@ -3,7 +3,7 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 from pathlib import Path
 
 
-def ml(text):
+def ml(text, min, max):
     # Загрузка предварительно обученной модели BART и токенизатора
     model_name = "facebook/bart-large-cnn"
     model = BartForConditionalGeneration.from_pretrained(model_name)
@@ -20,7 +20,7 @@ def ml(text):
     inputs = tokenizer(text, return_tensors="pt", max_length=1024, truncation=True, padding=True)
 
     # Генерация резюме
-    summary_ids = model.generate(inputs["input_ids"], max_length=100, min_length=20, length_penalty=1.0, num_beams=8, early_stopping=True)
+    summary_ids = model.generate(inputs["input_ids"], max_length=max, min_length=min, length_penalty=1.0, num_beams=8, early_stopping=True)
 
     # Декодирование и вывод резюме
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)

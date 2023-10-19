@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from langdetect import detect_langs
 from test import *
 from summa import keywords
+import yake
 
 import nltk
 
@@ -65,20 +66,38 @@ def chooseDocsClicked():
 def extract_keywords_from(text):
     if 'en' in str(detect_langs(text)):
         doc = nlp_en(text)
+        kw_extractor = yake.KeywordExtractor(
+            lan="en",  # язык
+            n=3,  # максимальное количество слов в фразе
+            dedupLim=0.3,  # порог похожести слов
+            top=15  # количество ключевых слов
+        )
+        keywords = kw_extractor.extract_keywords(text)
     elif 'es' in str(detect_langs(text)):
         doc = nlp_es(text)
+        kw_extractor = yake.KeywordExtractor(
+            lan="es",  # язык
+            n=3,  # максимальное количество слов в фразе
+            dedupLim=0.3,  # порог похожести слов
+            top=15  # количество ключевых слов
+        )
+        keywords = kw_extractor.extract_keywords(text)
+
+    print(keywords)
 
     #keywords = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
     #top_keywords = set(sorted(keywords, key=keywords.count, reverse=True)[:40])
-    
-    text_clean = ""
-    for i in text.split():
-        if i not in stops:
-            text_clean += i + " "
-    keywords.keywords(text_clean, language="russian").split("\n")
+    return ', '.join([i[0] for i in keywords])
 
 
-    return ', '.join(top_keywords)
+    # text_clean = ""
+    # for i in text.split():
+    #     if i not in stops:
+    #         text_clean += i + " "
+    # keywords.keywords(text_clean, language="russian").split("\n")
+
+
+    # return ', '.join(top_keywords)
 
 
 def get_essay(text):
@@ -136,7 +155,7 @@ def detectClicked():
     result += "\n\n--- ESSAY: ---\n"
     result += get_essay(text)
     result += "\n\n--- ML: ---\n"
-    result += ml(text)
+    result += ml(text, int(len(text.split())/4), int(len(text.split())/3))
     # result += "\n------------------\n"
     resultText.configure(state='normal')
     resultText.insert('end', result)
